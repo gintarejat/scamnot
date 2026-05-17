@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Crypto Job Scam Investigator</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --desk:#13110d;
+  --folder-edge:#9a7520;
+  --paper:#ede5cc;
+  --paper2:#e5dbc0;
+  --lines:rgba(0,0,0,0.06);
+  --ink:#1c1508;
+  --ink2:#5a4e35;
+  --red:#b81c14;
+  --navy:#1a3660;
+  --green:#006b46;
+  --font:'Courier New',Courier,monospace;
+}
+body{background:var(--desk);font-family:var(--font);padding:1.5rem 1rem 3rem;min-height:100vh}
+
+.wrap{max-width:700px;margin:0 auto}
+
+/* TABS */
+.tabs{display:flex;gap:3px;padding-left:28px}
+.tab{font-size:9px;font-weight:bold;letter-spacing:.18em;text-transform:uppercase;padding:6px 20px 9px;border-radius:3px 3px 0 0;position:relative;top:2px}
+.tab.on{background:var(--paper);color:var(--navy);z-index:3}
+.tab.off{background:#b8972a;color:#7a5e10;opacity:.75}
+
+/* FOLDER */
+.folder{background:var(--paper);border:1.5px solid var(--folder-edge);border-radius:0 4px 4px 4px;position:relative;overflow:hidden;box-shadow:6px 8px 32px rgba(0,0,0,.6)}
+
+.holes{position:absolute;left:0;top:0;bottom:0;width:26px;background:var(--paper2);border-right:1px solid rgba(0,0,0,.1);display:flex;flex-direction:column;align-items:center;justify-content:space-around;padding:24px 0;z-index:2}
+.hole{width:11px;height:11px;border-radius:50%;background:var(--desk);box-shadow:inset 0 1px 3px rgba(0,0,0,.4)}
+
+.body{margin-left:26px;padding:1.5rem 1.75rem 2rem;background:repeating-linear-gradient(transparent,transparent 27px,var(--lines) 27px,var(--lines) 28px)}
+
+/* HEADER */
+.fh{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid var(--navy);padding-bottom:12px;margin-bottom:1.5rem}
+.fh-kicker{font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:var(--navy);margin-bottom:3px}
+.fh-num{font-size:15px;font-weight:bold;color:var(--navy);letter-spacing:.08em}
+.fh-badge{border:2px solid var(--red);color:var(--red);font-size:9px;font-weight:bold;letter-spacing:.2em;padding:3px 10px;transform:rotate(-3deg);display:inline-block;opacity:.9}
+
+/* FORM */
+.form-label{font-size:8px;letter-spacing:.22em;text-transform:uppercase;color:var(--ink2);display:block;margin-bottom:5px}
+.form-input{width:100%;background:transparent;border:none;border-bottom:1.5px solid var(--ink2);font-family:var(--font);font-size:13px;color:var(--ink);padding:5px 0;outline:none;caret-color:var(--red)}
+.form-input::placeholder{color:var(--ink2);font-style:italic;font-size:11px}
+.form-input:focus{border-bottom-color:var(--navy)}
+.form-row{margin-bottom:14px}
+.btn-go{background:var(--navy);color:#c8d8f0;font-family:var(--font);font-size:10px;letter-spacing:.2em;text-transform:uppercase;border:none;padding:10px 24px;cursor:pointer;font-weight:bold;margin-top:4px;transition:background .15s}
+.btn-go:hover{background:#244d96}
+.btn-go:disabled{opacity:.45;cursor:not-allowed}
+
+/* LOADING */
+.loading{display:none;align-items:center;gap:20px;padding:2rem 0}
+.loading.on{display:flex}
+.pages{position:relative;width:52px;height:68px;flex-shrink:0}
+.pg{position:absolute;inset:0;background:var(--paper2);border:1px solid #c0a860;border-radius:2px}
+.pg:nth-child(1){animation:f1 2.2s ease-in-out infinite}
+.pg:nth-child(2){animation:f2 2.2s ease-in-out infinite .5s}
+.pg:nth-child(3){animation:f3 2.2s ease-in-out infinite 1s}
+@keyframes f1{0%,100%{transform:rotate(4deg) translateX(2px)}50%{transform:rotate(-12deg) translateX(-6px)}}
+@keyframes f2{0%,100%{transform:rotate(-1deg)}50%{transform:rotate(8deg) translateX(5px)}}
+@keyframes f3{0%,100%{transform:rotate(0)}50%{transform:rotate(-5deg) translateY(-4px)}}
+.load-label{font-size:10px;letter-spacing:.12em;color:var(--ink2)}
+.load-status{font-size:12px;font-weight:bold;color:var(--ink);margin-top:5px;min-height:20px}
+
+/* LOG */
+.log{display:none}
+.log.on{display:block}
+.log-title{font-size:8px;letter-spacing:.28em;text-transform:uppercase;color:var(--navy);padding-top:.75rem;border-top:1px solid rgba(26,54,96,.2);margin-bottom:1rem}
+
+/* STEP CARDS */
+.step{position:relative;background:#fffbf0;border:.5px solid #cdb870;border-left:3.5px solid var(--navy);padding:11px 14px 11px 13px;margin-bottom:11px;border-radius:0 2px 2px 0;opacity:0;transform:translateY(10px);transition:opacity .45s,transform .45s}
+.step.in{opacity:1;transform:translateY(0)}
+.step.flagged{border-left-color:var(--red)}
+.step.clear{border-left-color:var(--green)}
+
+/* PAPERCLIP */
+.clip{position:absolute;top:-4px;right:22px;width:18px;height:38px;opacity:0;transform:translateY(-12px);transition:opacity .3s .25s,transform .3s .25s}
+.step.in .clip{opacity:1;transform:translateY(0)}
+
+.s-num{font-size:8px;letter-spacing:.16em;color:var(--ink2);text-transform:uppercase;margin-bottom:2px}
+.s-label{font-size:12px;font-weight:bold;color:var(--ink);letter-spacing:.04em;margin-bottom:7px}
+.s-badge{display:inline-block;font-size:8px;font-weight:bold;letter-spacing:.2em;text-transform:uppercase;padding:2px 8px;border:1.5px solid;margin-bottom:7px}
+.s-badge.flagged{border-color:var(--red);color:var(--red)}
+.s-badge.clear{border-color:var(--green);color:var(--green)}
+.s-badge.unknown{border-color:var(--ink2);color:var(--ink2)}
+.s-sum{font-size:11px;font-weight:bold;color:var(--ink);margin-bottom:5px}
+.s-det{font-size:10.5px;color:var(--ink2);line-height:1.65;margin-bottom:7px}
+.flags{list-style:none}
+.flag{font-size:10px;color:var(--red);padding:1px 0}
+.flag::before{content:'▸ ';font-weight:bold}
+
+/* SOURCES */
+.src-btn{display:inline-flex;align-items:center;gap:5px;margin-top:8px;font-family:var(--font);font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:var(--navy);background:transparent;border:1px solid var(--navy);padding:3px 9px;cursor:pointer;transition:all .15s;opacity:.8}
+.src-btn:hover{background:var(--navy);color:var(--paper);opacity:1}
+.src-btn .arrow{transition:transform .2s;display:inline-block}
+.src-btn.open .arrow{transform:rotate(90deg)}
+.src-panel{display:none;margin-top:8px;padding:8px 10px;background:rgba(26,54,96,.06);border:1px solid rgba(26,54,96,.15);border-radius:1px}
+.src-panel.on{display:block}
+.src-item{display:flex;align-items:flex-start;gap:6px;padding:4px 0;border-bottom:.5px solid rgba(0,0,0,.06)}
+.src-item:last-child{border-bottom:none}
+.src-num{font-size:8px;color:var(--ink2);flex-shrink:0;padding-top:2px;min-width:16px}
+.src-link{font-size:10px;color:var(--navy);text-decoration:none;line-height:1.4;word-break:break-all}
+.src-link:hover{text-decoration:underline}
+.src-title{font-size:10px;color:var(--ink);display:block;margin-bottom:1px;font-weight:bold}
+.src-none{font-size:10px;color:var(--ink2);font-style:italic}
+
+/* NOTE */
+.note{background:#fffbe5;border:1px solid #c8b040;padding:11px;margin-top:1rem;font-size:10.5px;color:var(--ink);line-height:1.65;opacity:0;transition:opacity .5s}
+.note.in{opacity:1}
+.note-lbl{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:var(--ink2);display:block;margin-bottom:5px}
+
+/* VERDICT */
+.verdict{margin-top:2rem;padding-top:1.5rem;border-top:2px dashed rgba(0,0,0,.12);display:none}
+.verdict.on{display:block}
+.v-prompt{font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink2);margin-bottom:1rem}
+.v-btns{display:flex;gap:10px}
+.v-btn{flex:1;font-family:var(--font);font-size:10px;font-weight:bold;letter-spacing:.15em;text-transform:uppercase;padding:12px 8px;border:2px solid;cursor:pointer;background:transparent;transition:all .2s}
+.v-scam{border-color:var(--red);color:var(--red)}
+.v-scam:hover{background:var(--red);color:#fff}
+.v-legit{border-color:var(--green);color:var(--green)}
+.v-legit:hover{background:var(--green);color:#fff}
+
+/* STAMP */
+.stamp-wrap{display:none;text-align:center;padding:2rem 0 1.5rem}
+.stamp-wrap.on{display:block}
+.stamp-ring{display:inline-block;border:4px solid var(--red);border-radius:50%;padding:18px 28px;transform:rotate(-9deg);animation:stampIn .4s cubic-bezier(.175,.885,.32,1.275) both}
+.stamp-ring.ok{border-color:var(--green)}
+@keyframes stampIn{from{transform:rotate(-9deg) scale(2.2);opacity:0}to{transform:rotate(-9deg) scale(1);opacity:1}}
+.stamp-txt{font-size:20px;font-weight:bold;letter-spacing:.14em;color:var(--red);text-transform:uppercase}
+.stamp-ring.ok .stamp-txt{color:var(--green)}
+.stamp-sub{font-size:7px;letter-spacing:.3em;color:var(--ink2);display:block;margin-top:4px}
+.new-btn{margin-top:1.25rem;font-family:var(--font);font-size:9px;letter-spacing:.15em;background:none;border:1px solid var(--ink2);color:var(--ink2);padding:7px 18px;cursor:pointer;text-transform:uppercase}
+.new-btn:hover{background:rgba(0,0,0,.05)}
+
+.err{background:#ffeaea;border:1px solid var(--red);color:var(--red);font-size:10px;padding:10px;margin-top:12px;display:none;line-height:1.5}
+.err.on{display:block}
+
+/* SAVE TO DATABASE */
+.save-section{display:none;margin-top:1.5rem;padding-top:1.5rem;border-top:2px dashed rgba(0,0,0,.12)}
+.save-section.on{display:block}
+.save-title{font-size:8px;letter-spacing:.24em;text-transform:uppercase;color:var(--navy);margin-bottom:1rem}
+.save-row{margin-bottom:12px}
+.save-label{font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink2);display:block;margin-bottom:5px}
+.save-input{width:100%;background:transparent;border:none;border-bottom:1.5px solid var(--ink2);font-family:var(--font);font-size:12px;color:var(--ink);padding:5px 0;outline:none;caret-color:var(--red)}
+.save-input:focus{border-bottom-color:var(--navy)}
+.save-input::placeholder{color:var(--ink2);font-style:italic;font-size:11px}
+.save-textarea{width:100%;background:rgba(0,0,0,.03);border:.5px solid rgba(0,0,0,.12);border-bottom:1.5px solid var(--ink2);font-family:var(--font);font-size:11px;color:var(--ink);padding:6px;outline:none;resize:vertical;min-height:52px;caret-color:var(--red)}
+.save-textarea:focus{border-bottom-color:var(--navy)}
+.save-textarea::placeholder{color:var(--ink2);font-style:italic}
+.save-select{background:transparent;border:none;border-bottom:1.5px solid var(--ink2);font-family:var(--font);font-size:12px;color:var(--ink);padding:5px 0;outline:none;cursor:pointer;width:100%}
+.save-select option{background:var(--paper);color:var(--ink)}
+.scam-types{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
+.stype{font-size:9px;letter-spacing:.1em;padding:4px 10px;border:1px solid rgba(0,0,0,.2);cursor:pointer;border-radius:20px;color:var(--ink2);background:transparent;font-family:var(--font);transition:all .15s}
+.stype.on{background:var(--navy);color:#c8d8f0;border-color:var(--navy)}
+.save-btns{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap}
+.save-btn{font-family:var(--font);font-size:9px;font-weight:bold;letter-spacing:.18em;text-transform:uppercase;padding:10px 20px;border:none;cursor:pointer;transition:all .18s}
+.save-btn.primary{background:var(--navy);color:#c8d8f0}
+.save-btn.primary:hover{background:#244d96}
+.save-btn.secondary{background:transparent;border:1px solid var(--ink2);color:var(--ink2)}
+.save-btn.secondary:hover{background:rgba(0,0,0,.05)}
+.save-confirm{display:none;margin-top:10px;padding:10px 12px;background:rgba(0,107,70,.08);border:1px solid rgba(0,107,70,.25);font-size:10px;color:var(--green);line-height:1.55}
+.save-confirm.on{display:block}
+.save-note{font-size:8px;color:var(--ink2);margin-top:8px;line-height:1.5;font-style:italic}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="tabs">
+    <div class="tab on">Case File</div>
+    <div class="tab off">Active</div>
+    <div class="tab off">Restricted</div>
+  </div>
+  <div class="folder">
+    <div class="holes" id="holes"></div>
+    <div class="body">
+
+      <div class="fh">
+        <div>
+          <div class="fh-kicker">Financial Crime Investigation Unit · OSINT Division</div>
+          <div class="fh-num" id="caseNum">CASE # INV-2025-0000</div>
+        </div>
+        <div class="fh-badge">Restricted</div>
+      </div>
+
+      <div id="formSec">
+        <div class="form-row">
+          <label class="form-label">Subject of Investigation — Company / Job Listing / URL</label>
+          <input class="form-input" id="inp1" placeholder="e.g. WhiteBridge Ltd · or paste full job description..." autocomplete="off"/>
+        </div>
+        <div class="form-row">
+          <label class="form-label">Supporting Evidence (optional) — email content, website, salary, platform found on</label>
+          <input class="form-input" id="inp2" placeholder="e.g. recruited via WhatsApp, $80k Junior Crypto Analyst, address: 14 Whitebridge Gardens Bristol..."/>
+        </div>
+        <button class="btn-go" id="goBtn" onclick="go()">▶ Initiate Investigation</button>
+      </div>
+
+      <div class="err" id="errBox"></div>
+
+      <div class="loading" id="loading">
+        <div class="pages">
+          <div class="pg"></div><div class="pg"></div><div class="pg"></div>
+        </div>
+        <div>
+          <div class="load-label">Investigation in progress — cross-referencing databases</div>
+          <div class="load-status" id="loadStat">Scanning job listing...</div>
+        </div>
+      </div>
+
+      <div class="log" id="log">
+        <div class="log-title">● Evidence Log — Investigation Complete</div>
+        <div id="steps"></div>
+        <div class="note" id="note">
+          <span class="note-lbl">Investigator Assessment</span>
+          <span id="noteTxt"></span>
+        </div>
+      </div>
+
+      <div class="verdict" id="verdict">
+        <div class="v-prompt">Human-in-the-loop review — read the evidence above and render your verdict:</div>
+        <div class="v-btns">
+          <button class="v-btn v-scam" onclick="stamp('scam')">✕ Confirm: Scam / Fraud</button>
+          <button class="v-btn v-legit" onclick="stamp('legit')">✓ Clear: Appears Legitimate</button>
+        </div>
+      </div>
+
+      <div class="stamp-wrap" id="stampWrap">
+        <div class="stamp-ring" id="stampRing">
+          <div class="stamp-txt" id="stampTxt">FRAUD CONFIRMED</div>
+          <span class="stamp-sub" id="stampSub">CASE CLOSED · REFER TO FIU</span>
+        </div>
+        <br>
+        <button class="new-btn" onclick="reset()">↩ Open New Case</button>
+      </div>
+
+      <!-- SAVE TO DATABASE -->
+      <div class="save-section" id="saveSection">
+        <div class="save-title">● File to Database — Submit this Case</div>
+
+        <div class="save-row">
+          <label class="save-label">Your name / alias (shown on case card)</label>
+          <input class="save-input" id="saveAlias" placeholder="Anonymous"/>
+        </div>
+
+        <div class="save-row">
+          <label class="save-label">Company type</label>
+          <select class="save-select" id="saveCompanyType">
+            <option value="crypto">Crypto</option>
+            <option value="fiat">Fiat / Traditional Finance</option>
+            <option value="mixed">Mixed</option>
+          </select>
+        </div>
+
+        <div class="save-row">
+          <label class="save-label">Scam type tags (select all that apply)</label>
+          <div class="scam-types" id="scamTypes">
+            <button class="stype" data-val="job_offer" onclick="toggleType(this)">Job Offer</button>
+            <button class="stype" data-val="investment" onclick="toggleType(this)">Investment Fraud</button>
+            <button class="stype" data-val="impersonation" onclick="toggleType(this)">Impersonation</button>
+            <button class="stype" data-val="fake_platform" onclick="toggleType(this)">Fake Platform</button>
+            <button class="stype" data-val="advance_fee" onclick="toggleType(this)">Advance Fee</button>
+            <button class="stype" data-val="other" onclick="toggleType(this)">Other</button>
+          </div>
+        </div>
+
+        <div class="save-row">
+          <label class="save-label">Your note (optional — add context, how you found this, what happened)</label>
+          <textarea class="save-textarea" id="saveNote" placeholder="e.g. I received this offer directly via LinkedIn. The recruiter email was CC'd to 10 recipients..."></textarea>
+        </div>
+
+        <div class="save-btns">
+          <button class="save-btn primary" onclick="saveCase()">▼ Save to Database</button>
+          <button class="save-btn secondary" onclick="downloadJson()">↓ Download as JSON</button>
+        </div>
+
+        <div class="save-confirm" id="saveConfirm">
+          ✓ Case filed successfully. The JSON has been downloaded — drop it into your database or paste it into Supabase.<br>
+          <span style="color:var(--ink2)">When Supabase is connected, this will publish directly to the live database.</span>
+        </div>
+
+        <div class="save-note">Filing this case makes the investigation searchable in the AJATAUA database. The full evidence chain, sources, and your verdict will be visible to other investigators for peer review.</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// Punch holes
+const hc = document.getElementById('holes');
+for(let i=0;i<16;i++){const d=document.createElement('div');d.className='hole';hc.appendChild(d);}
+
+// Case number
+function genCase(){return `INV-${new Date().getFullYear()}-${(Math.random()*9000+1000|0)}`;}
+document.getElementById('caseNum').textContent = `CASE # ${genCase()}`;
+
+// Global state
+let currentReport = null;
+let currentVerdict = null;
+let currentCaseNum = document.getElementById('caseNum').textContent.replace('CASE # ','');
+
+// Status cycle
+const msgs = [
+  'Scanning job listing...','Tracing company registration...',
+  'Verifying registered address...','Analysing web presence...',
+  'Running personnel OSINT...','Checking contact vectors...',
+  'Scanning adverse media...','Compiling evidence file...'
+];
+let si;
+function startMsgs(){
+  let i=0;
+  document.getElementById('loadStat').textContent=msgs[0];
+  si=setInterval(()=>{i=(i+1)%msgs.length;document.getElementById('loadStat').textContent=msgs[i];},2600);
+}
+function stopMsgs(){clearInterval(si);}
+
+// Paperclip SVG
+function clipSvg(){
+  return `<svg class="clip" viewBox="0 0 18 40" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M9 2.5 C3.5 2.5 3.5 37 9 37 C14.5 37 14.5 8.5 9 8.5 C5.5 8.5 5.5 30.5 9 30.5"
+      stroke="#aaa" stroke-width="2" stroke-linecap="round"/>
+  </svg>`;
+}
+
+const SYS = `You are a senior financial crime investigator specialising in crypto job scam detection.
+Investigate the given company/job using web_search across exactly 7 areas. Be specific and factual. Do not invent information.
+
+Investigation areas:
+1. job_scan — Job listing details: company, role, salary, platform, email domain. Flag: unrealistic pay, vague role, free email, pressure tactics.
+2. company_reg — Search "[company] Companies House" or relevant registry. Find: registration date, address, directors, active/dissolved. Flag: recently registered, dissolved, not found.
+3. address — Verify the registered/listed address. Residential or commercial? Virtual office? Flag if suspicious.
+4. website — Find their website. Check: domain age, cloned content, quality. Flag: new domain, copied site.
+5. personnel — Search named recruiters/CEO. Verifiable LinkedIn? Industry history? Flag: thin/new/fake profiles.
+6. contact_methods — Note: mass CC'd emails? WhatsApp/Telegram hiring? Free email domain? Flag each.
+7. adverse_media — Search "[company] scam", "[company] fake job", "[company] fraud". Report any warnings found.
+
+IMPORTANT: Keep each "details" field under 60 words. Keep each "summary" under 20 words. Keep "flags" items under 15 words each. Keep "investigatorNote" under 60 words. This is critical to avoid response truncation.
+
+Return ONLY valid JSON, no markdown, no text outside the JSON:
+{"subject":"name","steps":[{"id":"job_scan","label":"Job Listing Scan","num":"01","status":"flagged|clear|unknown","summary":"<20 words>","details":"<60 words>","flags":["<15 words>"],"sources":[{"title":"page title","url":"https://..."}]},{"id":"company_reg","label":"Company Registration","num":"02","status":"...","summary":"...","details":"...","flags":[],"sources":[]},{"id":"address","label":"Address Verification","num":"03","status":"...","summary":"...","details":"...","flags":[],"sources":[]},{"id":"website","label":"Web Presence Analysis","num":"04","status":"...","summary":"...","details":"...","flags":[],"sources":[]},{"id":"personnel","label":"Personnel Background","num":"05","status":"...","summary":"...","details":"...","flags":[],"sources":[]},{"id":"contact","label":"Contact Method Analysis","num":"06","status":"...","summary":"...","details":"...","flags":[],"sources":[]},{"id":"adverse","label":"Adverse Media Scan","num":"07","status":"...","summary":"...","details":"...","flags":[],"sources":[]}],"flagCount":0,"riskLevel":"HIGH|MEDIUM|LOW","investigatorNote":"<60 words>"}`;
+
+async function runAgent(query) {
+  let messages = [{ role: "user", content: query }];
+
+  for (let turn = 0; turn < 25; turn++) {
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 8000,
+        tools: [{ type: "web_search_20250305", name: "web_search" }],
+        system: SYS,
+        messages
+      })
+    });
+
+    if (!resp.ok) {
+      const err = await resp.json().catch(() => ({}));
+      throw new Error(err.error?.message || `API error ${resp.status}`);
+    }
+
+    const data = await resp.json();
+    const textBlocks = (data.content || []).filter(b => b.type === "text");
+
+    if (data.stop_reason === "end_turn") {
+      return textBlocks.map(b => b.text).join("\n");
+    }
+
+    if (data.stop_reason === "tool_use") {
+      messages.push({ role: "assistant", content: data.content });
+      const results = (data.content || [])
+        .filter(b => b.type === "tool_use")
+        .map(b => ({ type: "tool_result", tool_use_id: b.id, content: [] }));
+      if (results.length) messages.push({ role: "user", content: results });
+      continue;
+    }
+
+    // max_tokens or unexpected
+    if (textBlocks.length) return textBlocks.map(b => b.text).join("\n");
+    break;
+  }
+  throw new Error("Investigation timed out after maximum search iterations.");
+}
+
+function parseReport(raw) {
+  // Strip markdown fences
+  let clean = raw.replace(/```json\s*/g,'').replace(/```\s*/g,'').trim();
+  const s = clean.indexOf('{');
+  if (s < 0) throw new Error("No JSON object found in response.");
+  clean = clean.slice(s);
+
+  // Try clean parse first
+  try { return JSON.parse(clean); } catch(_) {}
+
+  // Truncation recovery — find last complete step object and close the array/object
+  // Strategy: find the last complete closing brace of a step, close steps array + root object
+  try {
+    // Find last well-formed step by scanning for complete objects ending with }
+    const stepsMatch = clean.match(/"steps"\s*:\s*\[/);
+    if (!stepsMatch) throw new Error("Could not locate steps array.");
+
+    const stepsStart = clean.indexOf('[', clean.indexOf('"steps"'));
+    let depth = 0, lastGoodClose = -1;
+
+    for (let i = stepsStart; i < clean.length; i++) {
+      const ch = clean[i];
+      if (ch === '{') depth++;
+      if (ch === '}') {
+        depth--;
+        if (depth === 0) lastGoodClose = i; // closed a top-level step object
+      }
+      if (ch === ']' && depth === 0) { lastGoodClose = -2; break; } // array already closed
+    }
+
+    let repaired;
+    if (lastGoodClose === -2) {
+      // Array is closed, just close the root object
+      const arrClose = clean.indexOf(']', stepsStart);
+      repaired = clean.slice(0, arrClose + 1) + '}';
+    } else if (lastGoodClose > 0) {
+      // Close after last good step
+      repaired = clean.slice(0, lastGoodClose + 1) + ']}';
+    } else {
+      throw new Error("Could not recover any complete steps from truncated response.");
+    }
+
+    const result = JSON.parse(repaired);
+    result._truncated = true; // flag so UI can warn
+    return result;
+  } catch(e2) {
+    throw new Error("Response was cut off and could not be recovered. Try a shorter company name or less context. (" + e2.message + ")");
+  }
+}
+
+function badgeCls(st) { return st==='flagged'?'flagged':st==='clear'?'clear':'unknown'; }
+function badgeTxt(st) { return st==='flagged'?'▲ Flagged':st==='clear'?'✓ Clear':'? Unverified'; }
+
+async function go() {
+  const t = document.getElementById('inp1').value.trim();
+  if (!t) { document.getElementById('inp1').focus(); return; }
+  const c = document.getElementById('inp2').value.trim();
+  const query = c ? `${t}\n\nAdditional evidence provided: ${c}` : t;
+
+  document.getElementById('formSec').style.display = 'none';
+  document.getElementById('errBox').classList.remove('on');
+  document.getElementById('loading').classList.add('on');
+  document.getElementById('log').classList.remove('on');
+  document.getElementById('verdict').classList.remove('on');
+  document.getElementById('verdict').style.display = '';
+  document.getElementById('stampWrap').classList.remove('on');
+  document.getElementById('steps').innerHTML = '';
+  document.getElementById('note').classList.remove('in');
+  document.getElementById('goBtn').disabled = true;
+  startMsgs();
+
+  try {
+    const raw = await runAgent(query);
+    const report = parseReport(raw);
+    currentReport = report;
+    stopMsgs();
+    document.getElementById('loading').classList.remove('on');
+    showReport(report);
+  } catch(e) {
+    stopMsgs();
+    document.getElementById('loading').classList.remove('on');
+    document.getElementById('formSec').style.display = 'block';
+    document.getElementById('goBtn').disabled = false;
+    const eb = document.getElementById('errBox');
+    eb.textContent = `Investigation failed: ${e.message}`;
+    eb.classList.add('on');
+  }
+}
+
+function buildSourcesHtml(sources, stepIdx) {
+  const id = `src-panel-${stepIdx}`;
+  const btnId = `src-btn-${stepIdx}`;
+  if (!sources || sources.length === 0) {
+    return `<button class="src-btn" disabled style="opacity:.4;cursor:default">
+      <span class="arrow">▶</span> Sources — none retrieved
+    </button>`;
+  }
+  const items = sources.map((src, j) => `
+    <div class="src-item">
+      <span class="src-num">[${j+1}]</span>
+      <div>
+        <span class="src-title">${src.title || 'Source'}</span>
+        <a class="src-link" href="${src.url || '#'}" target="_blank" rel="noopener">${src.url || 'URL not available'}</a>
+      </div>
+    </div>`).join('');
+  return `
+    <button class="src-btn" id="${btnId}" onclick="toggleSrc('${id}','${btnId}')">
+      <span class="arrow">▶</span> Sources (${sources.length})
+    </button>
+    <div class="src-panel" id="${id}">${items}</div>`;
+}
+
+function toggleSrc(panelId, btnId) {
+  const panel = document.getElementById(panelId);
+  const btn = document.getElementById(btnId);
+  const isOpen = panel.classList.toggle('on');
+  btn.classList.toggle('open', isOpen);
+}
+
+function showReport(report) {
+  document.getElementById('log').classList.add('on');
+  const con = document.getElementById('steps');
+
+  if (report._truncated) {
+    const warn = document.createElement('div');
+    warn.style.cssText = 'font-size:9px;letter-spacing:.1em;color:var(--red);background:rgba(184,28,20,.07);border:1px solid rgba(184,28,20,.25);padding:7px 10px;margin-bottom:12px';
+    warn.textContent = '⚠ Response was truncated — partial results shown below. Some steps may be missing.';
+    con.appendChild(warn);
+  }
+
+  (report.steps || []).forEach((s, i) => {
+    const el = document.createElement('div');
+    el.className = `step ${s.status === 'flagged' ? 'flagged' : s.status === 'clear' ? 'clear' : ''}`;
+    const fl = (s.flags || []).length
+      ? `<ul class="flags">${s.flags.map(f => `<li class="flag">${f}</li>`).join('')}</ul>`
+      : '';
+    const srcs = buildSourcesHtml(s.sources, i);
+    el.innerHTML = `${clipSvg()}
+      <div class="s-num">${s.num || String(i+1).padStart(2,'0')} · Investigation Step</div>
+      <div class="s-label">${s.label}</div>
+      <span class="s-badge ${badgeCls(s.status)}">${badgeTxt(s.status)}</span>
+      <div class="s-sum">${s.summary || ''}</div>
+      <div class="s-det">${s.details || ''}</div>
+      ${fl}
+      ${srcs}`;
+    con.appendChild(el);
+    setTimeout(() => el.classList.add('in'), 100 + i * 400);
+  });
+
+  const base = 100 + (report.steps || []).length * 400;
+  setTimeout(() => {
+    const n = document.getElementById('note');
+    n.classList.add('in');
+    document.getElementById('noteTxt').textContent = report.investigatorNote || '';
+  }, base + 200);
+
+  setTimeout(() => {
+    document.getElementById('verdict').classList.add('on');
+  }, base + 900);
+}
+
+function stamp(choice) {
+  currentVerdict = choice;
+  document.getElementById('verdict').style.display = 'none';
+  const ring = document.getElementById('stampRing');
+  if (choice === 'scam') {
+    document.getElementById('stampTxt').textContent = 'FRAUD CONFIRMED';
+    document.getElementById('stampSub').textContent = 'CASE CLOSED · REFER TO FIU';
+    ring.classList.remove('ok');
+  } else {
+    document.getElementById('stampTxt').textContent = 'CLEARED';
+    document.getElementById('stampSub').textContent = 'NO FRAUD INDICATORS CONFIRMED';
+    ring.classList.add('ok');
+  }
+  document.getElementById('stampWrap').classList.add('on');
+  // Show save section after a brief delay
+  setTimeout(() => {
+    document.getElementById('saveSection').classList.add('on');
+    document.getElementById('saveSection').scrollIntoView({behavior:'smooth', block:'nearest'});
+  }, 800);
+}
+
+function reset() {
+  document.getElementById('inp1').value = '';
+  document.getElementById('inp2').value = '';
+  document.getElementById('formSec').style.display = 'block';
+  document.getElementById('goBtn').disabled = false;
+  document.getElementById('log').classList.remove('on');
+  document.getElementById('verdict').classList.remove('on');
+  document.getElementById('verdict').style.display = '';
+  document.getElementById('stampWrap').classList.remove('on');
+  document.getElementById('errBox').classList.remove('on');
+  document.getElementById('steps').innerHTML = '';
+  document.getElementById('note').classList.remove('in');
+  document.getElementById('saveSection').classList.remove('on');
+  document.getElementById('saveConfirm').classList.remove('on');
+  document.getElementById('saveAlias').value = '';
+  document.getElementById('saveNote').value = '';
+  document.querySelectorAll('.stype.on').forEach(el => el.classList.remove('on'));
+  currentReport = null;
+  currentVerdict = null;
+  currentCaseNum = genCase();
+  document.getElementById('caseNum').textContent = `CASE # ${currentCaseNum}`;
+}
+
+function toggleType(el) {
+  el.classList.toggle('on');
+}
+
+function buildCasePayload() {
+  const alias = document.getElementById('saveAlias').value.trim() || 'Anonymous';
+  const companyType = document.getElementById('saveCompanyType').value;
+  const note = document.getElementById('saveNote').value.trim();
+  const scamTypes = Array.from(document.querySelectorAll('.stype.on')).map(el => el.dataset.val);
+  const flagCount = currentReport
+    ? (currentReport.steps || []).filter(s => s.status === 'flagged').length
+    : 0;
+
+  return {
+    case_number: currentCaseNum,
+    created_at: new Date().toISOString().split('T')[0],
+    subject: currentReport?.subject || document.getElementById('inp1').value.trim(),
+    verdict: currentVerdict,
+    risk_level: currentReport?.riskLevel || 'MEDIUM',
+    company_type: companyType,
+    scam_types: scamTypes,
+    flag_count: flagCount,
+    investigator_note: currentReport?.investigatorNote || '',
+    submitter_alias: alias,
+    submitter_note: note || null,
+    investigation_data: currentReport || {},
+    // Supabase fields (populated server-side):
+    // submitted_by: auth.uid()
+    // id: gen_random_uuid()
+  };
+}
+
+function downloadJson() {
+  const payload = buildCasePayload();
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `${payload.case_number}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function saveCase() {
+  const payload = buildCasePayload();
+
+  // ── When Supabase is connected, replace this block with: ──
+  // const { data, error } = await supabase.from('cases').insert([payload]);
+  // ─────────────────────────────────────────────────────────
+
+  // For now: download the JSON and show confirmation
+  downloadJson();
+
+  document.getElementById('saveConfirm').classList.add('on');
+  document.querySelector('.save-btn.primary').disabled = true;
+  document.querySelector('.save-btn.primary').textContent = '✓ Filed';
+  document.querySelector('.save-btn.primary').style.opacity = '.5';
+}
+
+document.getElementById('inp1').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('inp2').focus(); });
+document.getElementById('inp2').addEventListener('keydown', e => { if(e.key==='Enter') go(); });
+</script>
+</body>
+</html>
