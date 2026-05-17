@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Crypto Job Scam Investigator</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js" defer></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -140,32 +141,10 @@ body{background:var(--desk);font-family:var(--font);padding:1.5rem 1rem 3rem;min
 .err{background:#ffeaea;border:1px solid var(--red);color:var(--red);font-size:10px;padding:10px;margin-top:12px;display:none;line-height:1.5}
 .err.on{display:block}
 
-/* SAVE TO DATABASE */
-.save-section{display:none;margin-top:1.5rem;padding-top:1.5rem;border-top:2px dashed rgba(0,0,0,.12)}
-.save-section.on{display:block}
-.save-title{font-size:8px;letter-spacing:.24em;text-transform:uppercase;color:var(--navy);margin-bottom:1rem}
-.save-row{margin-bottom:12px}
-.save-label{font-size:8px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink2);display:block;margin-bottom:5px}
-.save-input{width:100%;background:transparent;border:none;border-bottom:1.5px solid var(--ink2);font-family:var(--font);font-size:12px;color:var(--ink);padding:5px 0;outline:none;caret-color:var(--red)}
-.save-input:focus{border-bottom-color:var(--navy)}
-.save-input::placeholder{color:var(--ink2);font-style:italic;font-size:11px}
-.save-textarea{width:100%;background:rgba(0,0,0,.03);border:.5px solid rgba(0,0,0,.12);border-bottom:1.5px solid var(--ink2);font-family:var(--font);font-size:11px;color:var(--ink);padding:6px;outline:none;resize:vertical;min-height:52px;caret-color:var(--red)}
-.save-textarea:focus{border-bottom-color:var(--navy)}
-.save-textarea::placeholder{color:var(--ink2);font-style:italic}
-.save-select{background:transparent;border:none;border-bottom:1.5px solid var(--ink2);font-family:var(--font);font-size:12px;color:var(--ink);padding:5px 0;outline:none;cursor:pointer;width:100%}
-.save-select option{background:var(--paper);color:var(--ink)}
-.scam-types{display:flex;flex-wrap:wrap;gap:6px;margin-top:2px}
-.stype{font-size:9px;letter-spacing:.1em;padding:4px 10px;border:1px solid rgba(0,0,0,.2);cursor:pointer;border-radius:20px;color:var(--ink2);background:transparent;font-family:var(--font);transition:all .15s}
-.stype.on{background:var(--navy);color:#c8d8f0;border-color:var(--navy)}
-.save-btns{display:flex;gap:8px;margin-top:4px;flex-wrap:wrap}
-.save-btn{font-family:var(--font);font-size:9px;font-weight:bold;letter-spacing:.18em;text-transform:uppercase;padding:10px 20px;border:none;cursor:pointer;transition:all .18s}
-.save-btn.primary{background:var(--navy);color:#c8d8f0}
-.save-btn.primary:hover{background:#244d96}
-.save-btn.secondary{background:transparent;border:1px solid var(--ink2);color:var(--ink2)}
-.save-btn.secondary:hover{background:rgba(0,0,0,.05)}
-.save-confirm{display:none;margin-top:10px;padding:10px 12px;background:rgba(0,107,70,.08);border:1px solid rgba(0,107,70,.25);font-size:10px;color:var(--green);line-height:1.55}
-.save-confirm.on{display:block}
-.save-note{font-size:8px;color:var(--ink2);margin-top:8px;line-height:1.5;font-style:italic}
+/* PDF BUTTON (added next to "Open New Case") */
+.pdf-btn{background:var(--navy);color:#c8d8f0;font-family:var(--font);font-size:10px;font-weight:bold;letter-spacing:.18em;text-transform:uppercase;border:none;padding:10px 20px;cursor:pointer;transition:background .15s;margin-right:8px}
+.pdf-btn:hover{background:#244d96}
+.pdf-btn:disabled{opacity:.5;cursor:not-allowed}
 </style>
 </head>
 <body>
@@ -234,55 +213,8 @@ body{background:var(--desk);font-family:var(--font);padding:1.5rem 1rem 3rem;min
           <span class="stamp-sub" id="stampSub">CASE CLOSED · REFER TO FIU</span>
         </div>
         <br>
+        <button class="pdf-btn" onclick="downloadPdf()">↓ Download Report (PDF)</button>
         <button class="new-btn" onclick="reset()">↩ Open New Case</button>
-      </div>
-
-      <!-- SAVE TO DATABASE -->
-      <div class="save-section" id="saveSection">
-        <div class="save-title">● File to Database — Submit this Case</div>
-
-        <div class="save-row">
-          <label class="save-label">Your name / alias (shown on case card)</label>
-          <input class="save-input" id="saveAlias" placeholder="Anonymous"/>
-        </div>
-
-        <div class="save-row">
-          <label class="save-label">Company type</label>
-          <select class="save-select" id="saveCompanyType">
-            <option value="crypto">Crypto</option>
-            <option value="fiat">Fiat / Traditional Finance</option>
-            <option value="mixed">Mixed</option>
-          </select>
-        </div>
-
-        <div class="save-row">
-          <label class="save-label">Scam type tags (select all that apply)</label>
-          <div class="scam-types" id="scamTypes">
-            <button class="stype" data-val="job_offer" onclick="toggleType(this)">Job Offer</button>
-            <button class="stype" data-val="investment" onclick="toggleType(this)">Investment Fraud</button>
-            <button class="stype" data-val="impersonation" onclick="toggleType(this)">Impersonation</button>
-            <button class="stype" data-val="fake_platform" onclick="toggleType(this)">Fake Platform</button>
-            <button class="stype" data-val="advance_fee" onclick="toggleType(this)">Advance Fee</button>
-            <button class="stype" data-val="other" onclick="toggleType(this)">Other</button>
-          </div>
-        </div>
-
-        <div class="save-row">
-          <label class="save-label">Your note (optional — add context, how you found this, what happened)</label>
-          <textarea class="save-textarea" id="saveNote" placeholder="e.g. I received this offer directly via LinkedIn. The recruiter email was CC'd to 10 recipients..."></textarea>
-        </div>
-
-        <div class="save-btns">
-          <button class="save-btn primary" onclick="saveCase()">▼ Save to Database</button>
-          <button class="save-btn secondary" onclick="downloadJson()">↓ Download as JSON</button>
-        </div>
-
-        <div class="save-confirm" id="saveConfirm">
-          ✓ Case filed successfully. The JSON has been downloaded — drop it into your database or paste it into Supabase.<br>
-          <span style="color:var(--ink2)">When Supabase is connected, this will publish directly to the live database.</span>
-        </div>
-
-        <div class="save-note">Filing this case makes the investigation searchable in the AJATAUA database. The full evidence chain, sources, and your verdict will be visible to other investigators for peer review.</div>
       </div>
 
     </div>
@@ -347,14 +279,11 @@ async function runAgent(query) {
   let messages = [{ role: "user", content: query }];
 
   for (let turn = 0; turn < 25; turn++) {
-    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+    const resp = await fetch("/api/claude", {
       method: "POST",
-      headers: {        
-        'Content-Type': 'application/json',
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',},
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        model: "claude-sonnet-4-5",
+        model: "claude-sonnet-4-6",
         max_tokens: 8000,
         tools: [{ type: "web_search_20250305", name: "web_search" }],
         system: SYS,
@@ -565,11 +494,7 @@ function stamp(choice) {
     ring.classList.add('ok');
   }
   document.getElementById('stampWrap').classList.add('on');
-  // Show save section after a brief delay
-  setTimeout(() => {
-    document.getElementById('saveSection').classList.add('on');
-    document.getElementById('saveSection').scrollIntoView({behavior:'smooth', block:'nearest'});
-  }, 800);
+  document.getElementById('stampWrap').scrollIntoView({behavior:'smooth', block:'nearest'});
 }
 
 function reset() {
@@ -584,74 +509,217 @@ function reset() {
   document.getElementById('errBox').classList.remove('on');
   document.getElementById('steps').innerHTML = '';
   document.getElementById('note').classList.remove('in');
-  document.getElementById('saveSection').classList.remove('on');
-  document.getElementById('saveConfirm').classList.remove('on');
-  document.getElementById('saveAlias').value = '';
-  document.getElementById('saveNote').value = '';
-  document.querySelectorAll('.stype.on').forEach(el => el.classList.remove('on'));
   currentReport = null;
   currentVerdict = null;
   currentCaseNum = genCase();
   document.getElementById('caseNum').textContent = `CASE # ${currentCaseNum}`;
 }
 
-function toggleType(el) {
-  el.classList.toggle('on');
-}
+// ── PDF EXPORT ──────────────────────────────────────────────
+// Uses jsPDF (loaded via CDN below). Generates a clean case report
+// in the same navy/courier aesthetic as the in-app folder UI.
+function downloadPdf() {
+  if (!currentReport) {
+    alert('No investigation data available to export.');
+    return;
+  }
+  if (typeof window.jspdf === 'undefined') {
+    alert('PDF library still loading — try again in a moment.');
+    return;
+  }
 
-function buildCasePayload() {
-  const alias = document.getElementById('saveAlias').value.trim() || 'Anonymous';
-  const companyType = document.getElementById('saveCompanyType').value;
-  const note = document.getElementById('saveNote').value.trim();
-  const scamTypes = Array.from(document.querySelectorAll('.stype.on')).map(el => el.dataset.val);
-  const flagCount = currentReport
-    ? (currentReport.steps || []).filter(s => s.status === 'flagged').length
-    : 0;
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF({ unit: 'pt', format: 'a4' });
 
-  return {
-    case_number: currentCaseNum,
-    created_at: new Date().toISOString().split('T')[0],
-    subject: currentReport?.subject || document.getElementById('inp1').value.trim(),
-    verdict: currentVerdict,
-    risk_level: currentReport?.riskLevel || 'MEDIUM',
-    company_type: companyType,
-    scam_types: scamTypes,
-    flag_count: flagCount,
-    investigator_note: currentReport?.investigatorNote || '',
-    submitter_alias: alias,
-    submitter_note: note || null,
-    investigation_data: currentReport || {},
-    // Supabase fields (populated server-side):
-    // submitted_by: auth.uid()
-    // id: gen_random_uuid()
-  };
-}
+  const PAGE_W = doc.internal.pageSize.getWidth();
+  const PAGE_H = doc.internal.pageSize.getHeight();
+  const M = 50;
+  const CONTENT_W = PAGE_W - M * 2;
+  const NAVY = [26, 54, 96];
+  const RED  = [184, 28, 20];
+  const GREEN = [0, 107, 70];
+  const INK  = [28, 21, 8];
+  const INK2 = [90, 78, 53];
+  let y = M;
 
-function downloadJson() {
-  const payload = buildCasePayload();
-  const blob = new Blob([JSON.stringify(payload, null, 2)], {type:'application/json'});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `${payload.case_number}.json`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
+  function setColor(rgb) { doc.setTextColor(rgb[0], rgb[1], rgb[2]); }
+  function setFill(rgb)  { doc.setFillColor(rgb[0], rgb[1], rgb[2]); }
+  function setDraw(rgb)  { doc.setDrawColor(rgb[0], rgb[1], rgb[2]); }
+  function ensure(space) { if (y + space > PAGE_H - M) { doc.addPage(); y = M; } }
+  function writeWrapped(text, x, maxW, lineH) {
+    const lines = doc.splitTextToSize(text || '', maxW);
+    lines.forEach(ln => { ensure(lineH); doc.text(ln, x, y); y += lineH; });
+  }
 
-function saveCase() {
-  const payload = buildCasePayload();
+  // Header bar
+  setFill(NAVY);
+  doc.rect(0, 0, PAGE_W, 70, 'F');
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(15);
+  doc.setTextColor(232, 230, 223);
+  doc.text('AJATAUA — SCAM INVESTIGATION REPORT', M, 32);
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(180, 200, 230);
+  doc.text(currentCaseNum, M, 50);
+  doc.text('Filed: ' + new Date().toISOString().split('T')[0], PAGE_W - M, 50, { align: 'right' });
+  y = 95;
 
-  // ── When Supabase is connected, replace this block with: ──
-  // const { data, error } = await supabase.from('cases').insert([payload]);
-  // ─────────────────────────────────────────────────────────
+  // Subject
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(8);
+  setColor(INK2);
+  doc.text('SUBJECT', M, y); y += 14;
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(14);
+  setColor(INK);
+  writeWrapped(currentReport.subject || document.getElementById('inp1').value || 'Unknown', M, CONTENT_W, 17);
+  y += 6;
 
-  // For now: download the JSON and show confirmation
-  downloadJson();
+  // Risk badge
+  if (currentReport.riskLevel) {
+    const rl = currentReport.riskLevel.toUpperCase();
+    const badgeColor = rl === 'HIGH' ? RED : rl === 'LOW' ? GREEN : [180, 140, 30];
+    setFill(badgeColor);
+    doc.rect(M, y, 90, 18, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(9);
+    doc.setTextColor(255, 255, 255);
+    doc.text('RISK: ' + rl, M + 8, y + 12);
+    y += 28;
+  }
 
-  document.getElementById('saveConfirm').classList.add('on');
-  document.querySelector('.save-btn.primary').disabled = true;
-  document.querySelector('.save-btn.primary').textContent = '✓ Filed';
-  document.querySelector('.save-btn.primary').style.opacity = '.5';
+  // Investigator note (boxed)
+  if (currentReport.investigatorNote) {
+    const noteLines = doc.splitTextToSize(currentReport.investigatorNote, CONTENT_W - 20);
+    const noteH = 22 + noteLines.length * 12 + 8;
+    ensure(noteH);
+    setFill([245, 240, 225]);
+    setDraw(INK2);
+    doc.setLineWidth(0.5);
+    doc.rect(M, y, CONTENT_W, noteH, 'FD');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(7);
+    setColor(NAVY);
+    doc.text('INVESTIGATOR ASSESSMENT', M + 10, y + 14);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+    setColor(INK);
+    let ny = y + 30;
+    noteLines.forEach(ln => { doc.text(ln, M + 10, ny); ny += 12; });
+    y += noteH + 14;
+  }
+
+  // 7 investigation steps
+  (currentReport.steps || []).forEach(step => {
+    ensure(70);
+
+    setFill(NAVY);
+    doc.rect(M, y, 32, 22, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    doc.setTextColor(232, 230, 223);
+    doc.text(step.num || '--', M + 7, y + 15);
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(11);
+    setColor(INK);
+    doc.text(step.label || '', M + 42, y + 15);
+
+    const status = (step.status || 'unknown').toUpperCase();
+    const statColor = status === 'FLAGGED' ? RED : status === 'CLEAR' ? GREEN : INK2;
+    const statW = doc.getTextWidth(status) + 14;
+    setFill(statColor);
+    doc.rect(PAGE_W - M - statW, y + 2, statW, 18, 'F');
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(8);
+    doc.setTextColor(255, 255, 255);
+    doc.text(status, PAGE_W - M - statW + 7, y + 14);
+
+    y += 32;
+
+    if (step.summary) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      setColor(INK);
+      writeWrapped(step.summary, M, CONTENT_W, 13);
+      y += 2;
+    }
+    if (step.details) {
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      setColor(INK2);
+      writeWrapped(step.details, M, CONTENT_W, 12);
+      y += 4;
+    }
+    if (step.flags && step.flags.length) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(8);
+      setColor(RED);
+      ensure(14);
+      doc.text('FLAGS:', M, y); y += 12;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(9);
+      step.flags.forEach(f => {
+        const lines = doc.splitTextToSize('• ' + f, CONTENT_W - 10);
+        lines.forEach(ln => { ensure(12); doc.text(ln, M + 10, y); y += 12; });
+      });
+      y += 2;
+    }
+    if (step.sources && step.sources.length) {
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(7);
+      setColor(INK2);
+      ensure(14);
+      doc.text('SOURCES:', M, y); y += 11;
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      step.sources.forEach((s, i) => {
+        const line = `[${i + 1}] ${s.title || ''} — ${s.url || ''}`;
+        const lines = doc.splitTextToSize(line, CONTENT_W - 10);
+        lines.forEach(ln => { ensure(11); setColor(NAVY); doc.text(ln, M + 10, y); y += 10; });
+      });
+    }
+
+    y += 8;
+    setDraw([0, 0, 0]);
+    doc.setLineWidth(0.3);
+    doc.line(M, y, PAGE_W - M, y);
+    y += 14;
+  });
+
+  // Verdict stamp
+  if (currentVerdict) {
+    ensure(80);
+    const isScam = currentVerdict === 'scam';
+    const stampColor = isScam ? RED : GREEN;
+    const stampText = isScam ? 'FRAUD CONFIRMED' : 'CLEARED';
+    const stampSub  = isScam ? 'CASE CLOSED · REFER TO FIU' : 'NO FRAUD INDICATORS CONFIRMED';
+    setDraw(stampColor);
+    doc.setLineWidth(3);
+    doc.rect(M, y, CONTENT_W, 60);
+    setColor(stampColor);
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(20);
+    doc.text(stampText, PAGE_W / 2, y + 28, { align: 'center' });
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.text(stampSub, PAGE_W / 2, y + 48, { align: 'center' });
+    y += 80;
+  }
+
+  // Footer on every page
+  const pageCount = doc.internal.getNumberOfPages();
+  for (let p = 1; p <= pageCount; p++) {
+    doc.setPage(p);
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(7);
+    setColor(INK2);
+    doc.text('ajatauaml.com · Generated by AJATAUA Scam Investigator', M, PAGE_H - 20);
+    doc.text(`Page ${p} of ${pageCount}`, PAGE_W - M, PAGE_H - 20, { align: 'right' });
+  }
+
+  doc.save(`${currentCaseNum}.pdf`);
 }
 
 document.getElementById('inp1').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('inp2').focus(); });
