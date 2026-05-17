@@ -4,10 +4,21 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>Crypto Job Scam Investigator</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.2/jspdf.umd.min.js" defer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-     return HttpResponse(text, content_type="text/javascript")
+<script>
+window.onload = function() {
+    // Initialize jsPDF safely
+    const { jsPDF } = window.jspdf;
+    
+    document.getElementById('download-btn').addEventListener('click', () => {
+        const doc = new jsPDF();
+        doc.text("Hello world!", 10, 10);
+        doc.save("document.pdf");
+    });
+};
 </script>
+
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
