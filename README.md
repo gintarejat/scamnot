@@ -4,6 +4,8 @@
 
 An interactive, AI-driven investigation tool for AML analysts, financial crime investigators, and compliance professionals. An AI agent runs live web searches across **7 investigation areas** and returns sourced findings for a company, job listing or URL. It is built for crypto job scams and first-pass counterparty checks. The analyst makes the call.
 
+**What kind of AI this is:** an AI agent (read-only OSINT gathering) plus a human decision. The agent only searches and reports; it cannot act on anything.
+
 Built on Anthropic's Claude API. Deployed serverless via Vercel. Part of the [ajatau compliance automation suite](https://ajatauaml.com).
 
 ---
