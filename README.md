@@ -16,6 +16,24 @@ Part of the **[AML Operating System](https://ajatauaml.com/aml-operating-system.
 | **Users** | Job seekers checking an offer, and analysts doing a first-pass counterparty / KYB OSINT check |
 | **Output** | 7-area evidence file with sources, a risk level, a human verdict stamp, and a PDF |
 
+## The case that started it: the WhiteBridge teardown (worked by hand)
+
+A real employment scam circulated on LinkedIn, WeWorkRemotely, and RemoteOK offering "Junior Crypto Analyst & Trader" at $70k–$90k.
+
+**Investigation output:**
+- 🚩 **OpSec:** All recipients visible in CC field (mass target list, not recruitment)
+- 🚩 **KYB:** Registered address ≠ website address. Corporate registry mismatch.
+- 🚩 **Identity Cloning:** Company name identical to unrelated legitimate business. Hijacking search reputation.
+- 🚩 **Digital Forensics:** Website is direct clone of Bear Bull Traders. Founder photos copied. Name changed from "Andrew Aziz" → "Aiden Razi."
+- 🚩 **Communication:** HR contact via WhatsApp/Telegram only (no official email escalation path).
+- 🚩 **Financial Ask:** "Send screenshot proving you have $200 in crypto before training starts."
+
+**Verdict:** SCAM. No job. No company. Data harvesting operation designed to move conversations off-platform and extract funds.
+
+**The point:** separate red flags cluster into a coherent fraud pattern. Each flag alone is suspicious; together they're diagnostic. This manual investigation is what the tool was built to speed up.
+
+---
+
 ## Architecture
 
 ```
@@ -92,6 +110,22 @@ The web search tool must be enabled for your Anthropic organisation (it's a cons
 ## Roadmap
 
 A computed weighted score; a deterministic layer (Companies House API, RDAP, MX, OpenSanctions) before the agent; a narrower agent role (adverse-media entity resolution); a KYB mode; evidence pack v2; a re-check with a diff against the last run.
+
+---
+
+## Author
+
+**Gintarė Jatautytė** — AML analyst (25 months, Tier 1 Nordic bank) and AI compliance tool builder
+
+**LinkedIn:** [gintare-jatautyte](https://www.linkedin.com/in/gintare-jatautyte-11a507397/)  
+**Portfolio:** [ajatauaml.com](https://ajatauaml.com)  
+**Email:** gintare@ajatauaml.com
+
+---
+
+## License
+
+MIT (open source, use freely)
 
 ---
 *Results are leads, not findings of fact. Not legal advice. Built by Gintarė Jatautytė · [ajatauaml.com](https://ajatauaml.com)*
