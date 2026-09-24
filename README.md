@@ -2,7 +2,7 @@
 
 **Live demo:** [scamnot.vercel.app](https://scamnot.vercel.app)
 
-An interactive, AI-driven investigation tool for AML analysts, financial crime investigators, and compliance professionals. Applies a **7-area structured methodology** to deconstruct sophisticated employment scams, synthetic identities, and crypto fraud through automated OSINT and Enhanced Due Diligence.
+An interactive, AI-driven investigation tool for AML analysts, financial crime investigators, and compliance professionals. An AI agent runs live web searches across **7 investigation areas** and returns sourced findings for a company, job listing or URL. It is built for crypto job scams and first-pass counterparty checks. The analyst makes the call.
 
 Built on Anthropic's Claude API. Deployed serverless via Vercel. Part of the [ajatau compliance automation suite](https://ajatauaml.com).
 
@@ -10,25 +10,29 @@ Built on Anthropic's Claude API. Deployed serverless via Vercel. Part of the [aj
 
 ## The Problem It Solves
 
-Fraud investigations are manual, scattered, and slow. Analysts cross-reference corporate registries, domain WHOIS records, adverse media, social media profiles, blockchain data, and regulatory databases—separately. Most scams use the same playbook: identity cloning, address mismatches, communication typology shifts, upfront payment requests. The pattern is recognizable. The tool recognizes it.
+Fraud investigations are manual, scattered, and slow. Analysts check corporate registries, domain records, adverse media and social profiles separately. Most job scams use the same playbook: identity cloning, address mismatches, off-platform contact, upfront payment requests. The tool gathers that public evidence in one pass so the analyst can judge the pattern.
 
 ---
 
-## The 7-Area Methodology
+## The 7 investigation areas
 
-ScamNot structures investigations across seven linked areas:
+The agent searches the web and reports on seven areas. For each one it returns a status (flagged / clear / unverified), a short summary, details, specific flags and source links.
 
-1. **Operational Security (OpSec):** How the scam distributes itself (mass email lists, public job boards, LinkedIn recruitment spam). Red flag: visibility patterns that scale.
-2. **Know Your Business (KYB) & Corporate Registry:** Does the registered entity match the claimed entity? Address alignment? Domain registration timeline? Jurisdiction mismatch?
-3. **Digital Identity & Cloning:** Is the claimed person real? Do their credentials match across platforms? Are they cloning a legitimate person's photos, LinkedIn profile, or company structure?
-4. **Website & Digital Forensics:** Is the site a copy-paste of a legitimate competitor? Reverse image search. CSS/source code cloning. Domain age vs. claimed business age.
-5. **Communication Typologies:** How does the scammer communicate? Off-platform shifts (WhatsApp, Telegram before diligence complete)? Urgency language? Formal tone breaks?
-6. **Financial Ask Patterns:** Does the request make sense? Upfront payment from candidates? Unusual fee structures? Crypto-only payment?
-7. **Corroboration & Red Flag Weighting:** Which red flags cluster? Do they form a coherent scam pattern, or isolated oddities?
+| # | Area | What the agent looks for |
+|---|---|---|
+| 01 | **Job Listing Scan** | Company, role, salary, platform, email domain. Flags: unrealistic pay, vague role, free email, pressure tactics. |
+| 02 | **Company Registration** | Registry entry (e.g. Companies House): registration date, address, directors, active or dissolved. Flags: recently registered, dissolved, not found. |
+| 03 | **Address Verification** | Registered or listed address: residential, commercial or virtual office. |
+| 04 | **Web Presence** | Website, domain age, cloned content, quality. |
+| 05 | **Personnel Background** | Named recruiters or executives: verifiable profiles and industry history. Flags: thin, new or fake profiles. |
+| 06 | **Contact Methods** | Mass-CC emails, WhatsApp/Telegram hiring, free email domains. |
+| 07 | **Adverse Media** | Searches such as "[company] scam", "[company] fraud", "[company] fake job". |
+
+The agent also suggests an overall risk level (HIGH / MEDIUM / LOW) and a short investigator note. **The verdict is not automatic:** the analyst reads the evidence and clicks *Confirm: Scam / Fraud* or *Clear: Appears Legitimate*.
 
 ---
 
-## Live Case Study: The WhiteBridge Teardown
+## The case that started it: the WhiteBridge teardown (worked by hand)
 
 A real employment scam circulated on LinkedIn, WeWorkRemotely, and RemoteOK offering "Junior Crypto Analyst & Trader" at $70k–$90k.
 
@@ -42,127 +46,73 @@ A real employment scam circulated on LinkedIn, WeWorkRemotely, and RemoteOK offe
 
 **Verdict:** SCAM. No job. No company. Data harvesting operation designed to move conversations off-platform and extract funds.
 
-**The point:** Seven discrete red flags cluster into a coherent fraud pattern. Each flag alone is suspicious. Together, they're diagnostic.
+**The point:** separate red flags cluster into a coherent fraud pattern. Each flag alone is suspicious; together they're diagnostic. This manual investigation is what the tool was built to speed up.
 
 ---
 
 ## Architecture
 
-**Frontend:** Single-page HTML/CSS/JS artifact. Interactive form input. Real-time investigation flow.
+```
+Browser (index.html, vanilla JS, jsPDF)
+ ├─ Inputs: subject + optional supporting evidence
+ ├─ runAgent(): request loop (up to 25 iterations) → /api/claude
+ ├─ Parses the JSON findings and renders the 7 cards with sources
+ ├─ Human verdict buttons → stamp
+ └─ PDF export
+        │
+Vercel serverless  api/claude.js
+ ├─ In-memory rate limit: 5 investigations per IP per hour
+ └─ Adds ANTHROPIC_API_KEY → Anthropic Messages API
+      model: claude-sonnet-4-6 · max_tokens: 8000 · Anthropic web search tool
+```
 
-**AI Engine:** Anthropic Claude API (`claude-opus-4-6` or `claude-sonnet-4-6`). Structures unstructured scam data. Generates investigation summaries with chain-of-thought reasoning.
-
-**Backend:** Serverless via Vercel. Proxy file pattern (`api/investigate.js` or similar) routes API calls securely without exposing client-side keys.
-
-**Data:** No persistence. Investigations are ephemeral (client-side processing). No database. No user accounts.
+**Data:** no database, no user accounts. Investigations are not stored by the app. The subject and any pasted evidence are sent to the Anthropic API.
 
 ---
 
 ## Deployment (Vercel)
 
-**Time:** 60–90 minutes from local repo to global edge deployment.
-
-**Steps:**
-
-1. **Initialize repository**
-   ```bash
-   git init
-   git add .
-   git commit -m "Initial commit: ScamNot investigation tool"
-   git branch -M main
-   git remote add origin https://github.com/gintarejat/scamnot.git
-   git push -u origin main
-   ```
-
-2. **Set up Vercel proxy** (if API calls needed from frontend)
-   - Create `api/investigate.js` or `vercel.json` rewrite rules
-   - Route frontend requests to Anthropic API without exposing `ANTHROPIC_API_KEY`
-   - Example proxy pattern:
-     ```javascript
-     // api/investigate.js
-     export default async function handler(req, res) {
-       const { message } = req.body;
-       const response = await fetch('https://api.anthropic.com/v1/messages', {
-         method: 'POST',
-         headers: {
-           'x-api-key': process.env.ANTHROPIC_API_KEY,
-           'content-type': 'application/json',
-         },
-         body: JSON.stringify({
-           model: 'claude-opus-4-6',
-           max_tokens: 2048,
-           messages: [{ role: 'user', content: message }],
-         }),
-       });
-       return res.status(200).json(response);
-     }
-     ```
-
-3. **Configure environment**
-   - Connect GitHub repo to Vercel dashboard
-   - Settings → Environment Variables
-   - Add `ANTHROPIC_API_KEY`
-   - Deploy
-
-4. **Test**
-   - Open live URL
-   - Test investigation flow
-   - Verify Claude API responses render correctly
+1. Import the GitHub repo into Vercel.
+2. Settings → Environment Variables → add `ANTHROPIC_API_KEY`.
+3. Make sure web search is enabled for your Anthropic organisation (console setting).
+4. Deploy. No build step: `index.html` is served as-is and `api/claude.js` runs as a serverless function.
 
 ---
 
 ## Usage
 
-1. **Open the tool:** [scamnot.vercel.app](https://scamnot.vercel.app)
-2. **Input scam data:** Paste job posting, email, website URL, company name, or any fraud indicator
-3. **Run investigation:** Tool applies 7-area methodology automatically
-4. **Review output:** See structured findings, red flag weighting, and final verdict
+1. Open [scamnot.vercel.app](https://scamnot.vercel.app).
+2. Enter the company, job listing or URL; optionally paste the email text, salary or where you found it.
+3. Click **▶ Initiate Investigation** and wait while the agent searches (usually one to a few minutes).
+4. Read each area's findings and open the sources.
+5. Give your verdict and download the PDF report.
 
-**No signup. No data stored. No tracking.**
-
----
-
-## Technical Notes
-
-**API Integration:**
-- Calls are synchronous (request → Claude processes → response renders)
-- Timeout: 30 seconds (typical Claude response <10 seconds)
-- Rate limiting: Set via Upstash Redis or Vercel edge middleware (10 req/IP/hour recommended to control costs)
-
-**Cost:**
-- Anthropic API is token-based. Typical investigation: 500–2,000 tokens (~$0.01–$0.05 per run)
-- To minimize cost, consider storing investigation templates locally and only calling Claude for novel patterns
-
-**Limitations:**
-- No real-time blockchain lookups (would require Chainalysis/TRM Labs API integration—premium cost)
-- No live web scraping (would require additional infrastructure)
-- OSINT is demo-grade (suitable for interview/portfolio, not production compliance)
+No signup, no stored data.
 
 ---
 
-## Why This Tool Exists
+## Limitations
 
-This is a portfolio piece demonstrating:
-- **AML domain knowledge** (fraud typology, OSINT, EDD)
-- **AI integration** (Claude API, chain-of-thought reasoning, real-time processing)
-- **Full-stack capability** (frontend UX, backend proxy, deployment)
-- **Practitioner perspective** (built by someone who actually did investigations, not an ML engineer guessing)
-
-It is not positioned as a commercial product. It is proof that I can take a domain problem (fraud investigation is slow) and build an interactive AI solution in <100 lines of code.
+- **The AI suggests the risk level.** It is not a computed score and can differ between runs.
+- **Source links are written by the model** in its answer. Open them before relying on a finding.
+- **No sanctions or PEP list screening,** and no direct registry, WHOIS or blockchain API. Everything comes from web search results.
+- **Rate limit is in-memory,** so it resets when Vercel starts a new instance.
+- **Cost:** each run can use up to 8,000 output tokens plus several web searches, which are billed separately. Check current Anthropic pricing.
+- OSINT is portfolio-grade, not a production compliance control.
 
 ---
 
 ## Files
 
-- `index.html` — Main application (single-file artifact)
-- `api/investigate.js` — Vercel proxy (if deployed on Vercel)
-- `vercel.json` — Deployment config
+- `index.html` — the whole application
+- `api/claude.js` — Vercel proxy with rate limit
+- `package.json`
 
 ---
 
 ## Author
 
-**Gintarė Jatautytė** — AML Officer (2 years Nordic Tier-1 bank) + AI compliance tool builder
+**Gintarė Jatautytė** — AML analyst (25 months, Tier 1 Nordic bank) and AI compliance tool builder
 
 **LinkedIn:** [gintare-jatautyte](https://www.linkedin.com/in/gintare-jatautyte-11a507397/)  
 **Portfolio:** [ajatauaml.com](https://ajatauaml.com)  
@@ -176,4 +126,4 @@ MIT (open source, use freely)
 
 ---
 
-**Last updated:** 18 May 2026
+**Last updated:** 24 September 2026
