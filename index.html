@@ -199,6 +199,47 @@ body::before{content:"";position:fixed;inset:-50%;pointer-events:none;z-index:99
 .new-btn{border:2px solid var(--ink);color:var(--ink);font-family:'Archivo Black',sans-serif}
 .new-btn:hover{background:var(--yellow)}
 .err{background:rgba(228,22,27,.06);border:2px solid var(--red)}
+/* ══════════ TABS AS NAVIGATION + DOC PAGES ══════════ */
+.tabs{flex-wrap:wrap}
+a.tab{text-decoration:none;cursor:pointer}
+a.tab.off:hover{background:var(--yellow);color:var(--ink)}
+.doc{font-size:12px;color:var(--ink);line-height:1.7}
+.doc[hidden]{display:none}
+.doc-kicker{font-family:'Permanent Marker',cursive;font-size:14px;color:var(--red);transform:rotate(-1deg);display:inline-block}
+.doc-title{font-family:'Archivo Black',sans-serif;font-weight:400;font-size:26px;text-transform:uppercase;line-height:1.05;margin:4px 0 8px}
+.doc-lede{font-size:12px;color:var(--ink2);margin-bottom:.5rem}
+.doc-lede b,.doc b{color:var(--ink)}
+.doc a{color:var(--red);text-decoration:underline;text-decoration-color:var(--yellow);text-decoration-thickness:3px}
+.doc-sec{font-family:'Archivo Black',sans-serif;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--red);border-top:3px solid var(--ink);padding-top:.75rem;margin:1.6rem 0 .9rem}
+.doc-card{background:var(--paper);border:1.5px solid var(--ink);border-left:5px solid var(--ink);padding:11px 14px;margin-bottom:11px}
+.doc-card.ai{border-left-color:#b98900;background:rgba(255,214,10,.1)}
+.doc-card.human{border-left-color:var(--red)}
+.doc-card .s-label{margin-bottom:4px}
+.doc ol,.doc ul{margin:2px 0 2px 20px;font-size:11.5px}
+.doc li{margin:2px 0}
+.doc .s-badge{margin:0 2px 0 0;white-space:nowrap}
+.doc code{font-family:'Special Elite','Courier New',monospace;font-size:11px;background:var(--paper2);border:1px solid rgba(20,20,20,.2);padding:0 4px}
+.doc-warn{display:block;margin-top:3px;font-family:'Permanent Marker',cursive;font-size:12px;color:var(--red)}
+.doc .note p{margin:0 0 6px}
+.doc .note ul{margin-left:16px}
+.tbl-wrap{overflow-x:auto}
+.doc-tbl{width:100%;border-collapse:collapse;font-size:11px;background:var(--paper)}
+.doc-tbl th{font-family:'Archivo Black',sans-serif;font-weight:400;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;text-align:left;padding:6px 8px;border-bottom:2px solid var(--ink)}
+.doc-tbl td{padding:7px 8px;border-bottom:1px dashed rgba(20,20,20,.25);vertical-align:top}
+.doc-tbl tr:last-child td{border-bottom:none}
+.doc-tbl td:first-child{font-weight:bold}
+.na{font-size:9px;letter-spacing:.1em;color:var(--ink2);white-space:nowrap}
+.layer-map{list-style:none;margin:0;padding:0;background:var(--paper);border:2px solid var(--ink);box-shadow:4px 5px 0 var(--ink)}
+.lm-row{display:flex;align-items:center;gap:12px;padding:8px 14px;border-bottom:1.5px solid rgba(20,20,20,.15)}
+.lm-row:last-child{border-bottom:none}
+.lm-num{font-family:'Archivo Black',sans-serif;font-size:20px;color:var(--red);width:18px;flex-shrink:0}
+.lm-name{font-family:'Archivo Black',sans-serif;font-size:12px;text-transform:uppercase;flex:1}
+.lm-tool{font-size:11px;text-align:right}
+.lm-row.here{background:var(--yellow)}
+.lm-row.here .lm-tool,.lm-row.part .lm-tool{font-family:'Archivo Black',sans-serif;background:var(--ink);color:var(--yellow);padding:2px 8px;transform:rotate(-1.5deg)}
+.lm-row.part{background:rgba(255,214,10,.35)}
+.lm-row.dim .lm-num,.lm-row.dim .lm-name,.lm-row.dim .lm-tool{color:#8a857b}
+@media(max-width:560px){.tabs{padding-left:6px;gap:2px}.tab{padding:6px 8px 9px;font-size:9px;letter-spacing:.02em}.body{padding:1.2rem 1rem 1.6rem}.doc-title{font-size:21px}.lm-row{flex-wrap:wrap;gap:4px 10px}.lm-tool{width:100%;text-align:left;padding-left:28px}}
 .aos-back{position:fixed;right:16px;bottom:14px;z-index:10000;font-family:'Archivo Black',sans-serif;font-size:12px;letter-spacing:.03em;
   text-decoration:none;color:#fffdf8;background:#141414;padding:7px 11px 6px;transform:rotate(-2deg);box-shadow:3px 3px 0 #e4161b;transition:transform .15s steps(2,end)}
 .aos-back:hover{transform:rotate(-2deg) translate(-2px,-2px);box-shadow:5px 5px 0 #e4161b}
@@ -208,9 +249,9 @@ body::before{content:"";position:fixed;inset:-50%;pointer-events:none;z-index:99
 <a class="aos-back" href="https://ajatauaml.com/aml-operating-system.html">&larr; AML Operating System</a>
 <div class="wrap">
   <div class="tabs">
-    <div class="tab on">Case File</div>
-    <div class="tab off">Active</div>
-    <div class="tab off">Restricted</div>
+    <a class="tab on" href="#case-file" data-view="app">Case File</a>
+    <a class="tab off" href="#how-to-use" data-view="howto">How To Use</a>
+    <a class="tab off" href="#place-in-aml-os" data-view="place">Place in AML OS</a>
   </div>
   <div class="folder">
     <div class="holes" id="holes"></div>
@@ -224,6 +265,7 @@ body::before{content:"";position:fixed;inset:-50%;pointer-events:none;z-index:99
         <div class="fh-badge">Restricted</div>
       </div>
 
+      <div id="view-app">
       <div id="formSec">
         <div class="form-row">
           <label class="form-label">Subject of Investigation — Company / Job Listing / URL</label>
@@ -273,6 +315,164 @@ body::before{content:"";position:fixed;inset:-50%;pointer-events:none;z-index:99
         <br>
         <button class="pdf-btn" onclick="downloadPdf()">↓ Download Report (PDF)</button>
         <button class="new-btn" onclick="reset()">↩ Open New Case</button>
+      </div>
+      </div><!-- /view-app -->
+
+      <!-- ═══════════ HOW TO USE ═══════════ -->
+      <div id="view-howto" class="doc" hidden>
+        <div class="doc-kicker">Field manual · read before opening a case</div>
+        <h2 class="doc-title">How to use Scamnot</h2>
+        <p class="doc-lede"><b>Time:</b> 1–3 minutes per investigation · <b>Limit:</b> 5 investigations per hour per IP address</p>
+
+        <div class="doc-sec">The five steps</div>
+
+        <div class="doc-card">
+          <div class="s-num">01 · You</div>
+          <div class="s-label">Open a case</div>
+          <ol start="1">
+            <li>In <b>Subject of Investigation — Company / Job Listing / URL</b>, enter the most specific identifier you have:
+              <ul>
+                <li>company name + country (<code>Nordvik Capital Ltd, UK</code>), or</li>
+                <li>the job listing URL, or</li>
+                <li>the website domain.</li>
+              </ul>
+            </li>
+            <li>In <b>Supporting Evidence (optional)</b>, paste what you have: the recruiter's email text, the salary offered, where you found the listing, names mentioned. <b>The more you paste, the better steps 01 and 06 get.</b>
+              <span class="doc-warn">Don't paste passwords, ID documents or bank details.</span></li>
+          </ol>
+        </div>
+
+        <div class="doc-card ai">
+          <div class="s-num">02 · The agent</div>
+          <div class="s-label">Run it</div>
+          <ol start="3">
+            <li>Click <b>▶ Initiate Investigation</b>. The case number at the top of the folder (<code>INV-2026-xxxx</code>) identifies this investigation.</li>
+            <li>The status line cycles through the areas ("Running personnel OSINT…", "Scanning adverse media…"). The agent is searching the web at this point.</li>
+          </ol>
+        </div>
+
+        <div class="doc-card">
+          <div class="s-num">03 · You</div>
+          <div class="s-label">Read the evidence</div>
+          <ol start="5">
+            <li>Seven cards appear, 01 → 07. Each has:
+              <ul>
+                <li>a badge: <span class="s-badge flagged">▲ Flagged</span> <span class="s-badge clear">✓ Clear</span> or <span class="s-badge unknown">? Unverified</span></li>
+                <li>a one-line summary, details and specific flags</li>
+                <li><b>source buttons</b>. Open them. A finding is only as good as its source.</li>
+              </ul>
+            </li>
+            <li>Read <b>? Unverified</b> as "couldn't find evidence either way", not as "fine".</li>
+            <li>The overall risk level (HIGH / MEDIUM / LOW) is the <b>AI's opinion</b>, not a score. Use it as a hint.</li>
+          </ol>
+        </div>
+
+        <div class="doc-card human">
+          <div class="s-num">04 · You — human-in-the-loop</div>
+          <div class="s-label">Decide</div>
+          <ol start="8">
+            <li>Under <i>Human-in-the-loop review</i>, pick <b>✕ Confirm: Scam / Fraud</b> or <b>✓ Clear: Appears Legitimate</b>.</li>
+            <li>A stamp shows your verdict. Only click once you've checked the flagged sources yourself.</li>
+          </ol>
+        </div>
+
+        <div class="doc-card">
+          <div class="s-num">05 · You</div>
+          <div class="s-label">Export</div>
+          <ol start="10">
+            <li>Click <b>↓ Download Report (PDF)</b> for the evidence file (case number, 7 findings, sources, verdict).</li>
+            <li><b>↩ Open New Case</b> resets the form.</li>
+          </ol>
+        </div>
+
+        <div class="doc-sec">Reading the results well</div>
+        <div class="note in">
+          <span class="note-lbl">Before you trust a finding</span>
+          <ul>
+            <li><b>Name collisions:</b> an adverse-media hit may be about a <i>different</i> company with a similar name. Check the country, dates and people.</li>
+            <li><b>"Not found in registry"</b> can mean the company is registered in another country. Check the right registry by hand (UK: Companies House; Lithuania: Registrų centras).</li>
+            <li><b>Domain age:</b> confirm with a WHOIS/RDAP lookup if it matters to your verdict.</li>
+            <li>A clean result isn't proof of legitimacy. It means public sources raised nothing.</li>
+          </ul>
+        </div>
+
+        <div class="doc-sec">Troubleshooting</div>
+        <div class="tbl-wrap"><table class="doc-tbl">
+          <thead><tr><th>Symptom</th><th>Likely cause</th></tr></thead>
+          <tbody>
+            <tr><td>"Rate limit: 5 investigations/hour per IP"</td><td>Wait an hour, or deploy your own copy</td></tr>
+            <tr><td>"Investigation timed out after maximum search iterations"</td><td>The agent didn't finish. Retry with a more specific subject.</td></tr>
+            <tr><td>Cards show "? Unverified" everywhere</td><td>The subject is too vague, or web search is disabled for the API key</td></tr>
+            <tr><td>Nothing happens on click</td><td>Subject field is empty (focus jumps back to it)</td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <!-- ═══════════ PLACE IN AML OS ═══════════ -->
+      <div id="view-place" class="doc" hidden>
+        <div class="doc-kicker">AML Operating System · Layers 3 &amp; 4</div>
+        <h2 class="doc-title">Place in the AML OS</h2>
+        <p class="doc-lede"><b>Primary layer: 3 · Customer lifecycle</b> (knowing who the counterparty is).<br>
+          <b>Secondary layer: 4 · Control systems</b> (adverse media; sanctions and PEP planned).
+          <a href="https://ajatauaml.com/aml-operating-system.html">See the full map ↗</a></p>
+
+        <div class="doc-sec">Where it sits</div>
+        <ol class="layer-map">
+          <li class="lm-row"><span class="lm-num">1</span><span class="lm-name">Governance</span><span class="lm-tool">Policy Reader</span></li>
+          <li class="lm-row dim"><span class="lm-num">2</span><span class="lm-name">Risk assessment</span><span class="lm-tool">touched per entity only (risk level)</span></li>
+          <li class="lm-row here"><span class="lm-num">3</span><span class="lm-name">Customer lifecycle</span><span class="lm-tool">SCAMNOT</span></li>
+          <li class="lm-row part"><span class="lm-num">4</span><span class="lm-name">Control systems</span><span class="lm-tool">SCAMNOT — partial</span></li>
+          <li class="lm-row"><span class="lm-num">5</span><span class="lm-name">Investigation &amp; reporting</span><span class="lm-tool">SAR Draft Automation</span></li>
+          <li class="lm-row dim"><span class="lm-num">6</span><span class="lm-name">Effectiveness</span><span class="lm-tool">not built</span></li>
+        </ol>
+
+        <div class="doc-sec">Layer 3 · Customer lifecycle</div>
+        <div class="tbl-wrap"><table class="doc-tbl">
+          <thead><tr><th>Element (from the AML OS map)</th><th>Status</th><th>Honest note</th></tr></thead>
+          <tbody>
+            <tr><td>Identify entity, directors &amp; UBOs</td><td><span class="s-badge unknown">⚠ Partial</span></td><td>Directors via web search of registry pages. <b>No UBO / PSC tracing.</b> Planned: Companies House API including PSC, and a KYB mode.</td></tr>
+            <tr><td>Ownership &amp; control structure</td><td><span class="s-badge unknown">⚠ Weak</span></td><td>Only what search results show</td></tr>
+            <tr><td>Stated purpose vs public evidence</td><td><span class="s-badge clear">✓ Built</span></td><td>This is where the AI adds real value (website vs claims)</td></tr>
+            <tr><td>✱ Risk rating &amp; CDD/EDD call</td><td><span class="s-badge unknown">⚠ Partial</span></td><td>The AI proposes HIGH/MED/LOW. It should become a weighted score with the human making the CDD/EDD call.</td></tr>
+            <tr><td>✱ Approve · restrict · reject · exit</td><td><span class="s-badge clear">✓ Binary</span></td><td>Scam / Legitimate verdict. KYB mode would need Approve / EDD / Reject.</td></tr>
+            <tr><td>Ongoing review</td><td><span class="s-badge flagged">✗ Not built</span></td><td>Planned: re-check with a diff against the last run</td></tr>
+          </tbody>
+        </table></div>
+
+        <div class="doc-sec">Layer 4 · Control systems</div>
+        <div class="tbl-wrap"><table class="doc-tbl">
+          <thead><tr><th>Element</th><th>Status</th><th>Honest note</th></tr></thead>
+          <tbody>
+            <tr><td>Sanctions screening</td><td><span class="s-badge flagged">✗ Not built</span></td><td>Not in the code. Planned.</td></tr>
+            <tr><td>PEP screening</td><td><span class="s-badge flagged">✗ Not built</span></td><td>Not in the code. Planned.</td></tr>
+            <tr><td>Adverse media</td><td><span class="s-badge clear">✓ Built</span></td><td>Area 07, via web search</td></tr>
+            <tr><td>KYB / UBO checks</td><td><span class="s-badge unknown">⚠ Partial</span></td><td>Registry lookup by search; no UBO</td></tr>
+            <tr><td>Transaction monitoring</td><td><span class="na">— n/a</span></td><td>Not this tool's job; see SAR Draft Automation's planned TM Lab</td></tr>
+            <tr><td>Source of funds / wealth</td><td><span class="na">— n/a</span></td><td>Not covered</td></tr>
+          </tbody>
+        </table></div>
+
+        <div class="doc-sec">Upstream and downstream</div>
+        <div class="tbl-wrap"><table class="doc-tbl">
+          <thead><tr><th>Direction</th><th>Link</th></tr></thead>
+          <tbody>
+            <tr><td>Upstream</td><td>A job offer, an onboarding application or a counterparty name</td></tr>
+            <tr><td>Downstream → Layer 5</td><td>The evidence pack can serve as the OSINT input to a SAR case</td></tr>
+            <tr><td>Downstream → Layer 2</td><td>Planned: the weighted score becomes the counterparty's risk factor breakdown</td></tr>
+          </tbody>
+        </table></div>
+
+        <div class="doc-sec">Human gates (✱ in the map)</div>
+        <div class="doc-card human"><div class="s-num">Gate 1</div><div class="s-label">The analyst chooses what to investigate and what evidence to supply</div></div>
+        <div class="doc-card human"><div class="s-num">Gate 2</div><div class="s-label">The analyst reads the sources</div></div>
+        <div class="doc-card human"><div class="s-num">Gate 3</div><div class="s-label">The analyst gives the verdict. The AI never stamps anything.</div></div>
+
+        <div class="doc-sec">Why this layer matters</div>
+        <div class="note in">
+          <span class="note-lbl">Know who you are dealing with</span>
+          <p>Every later control depends on knowing who the counterparty is. A solid KYB check means registry checks with a manual fallback, ownership traced down to the people behind the business, everyone behind it screened, and monitoring that continues after onboarding.</p>
+          <p>Reading adverse media and deciding whether a hit is really about the same entity is one of the places AI helps most, and Scamnot already does that part. The upgrade is adding deterministic registry, domain and sanctions checks underneath it, so the evidence is reproducible.</p>
+        </div>
       </div>
 
     </div>
@@ -359,6 +559,13 @@ async function runAgent(query) {
 
     if (data.stop_reason === "end_turn") {
       return textBlocks.map(b => b.text).join("\n");
+    }
+
+    // Web search runs on Anthropic's side. When its server loop hits its limit the
+    // response stops with pause_turn: send the turn back as-is and the API resumes it.
+    if (data.stop_reason === "pause_turn") {
+      messages.push({ role: "assistant", content: data.content });
+      continue;
     }
 
     if (data.stop_reason === "tool_use") {
@@ -779,6 +986,19 @@ function downloadPdf() {
 
   doc.save(`${currentCaseNum}.pdf`);
 }
+
+// Folder tabs switch between the case file and the two guide pages
+const VIEWS = { '#how-to-use': 'howto', '#place-in-aml-os': 'place' };
+function showView() {
+  const v = VIEWS[location.hash] || 'app';
+  ['app', 'howto', 'place'].forEach(k => { document.getElementById('view-' + k).hidden = k !== v; });
+  document.querySelectorAll('.tabs .tab').forEach(t => {
+    const on = t.dataset.view === v;
+    t.classList.toggle('on', on); t.classList.toggle('off', !on);
+  });
+}
+addEventListener('hashchange', () => { showView(); scrollTo(0, 0); });
+showView();
 
 document.getElementById('inp1').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('inp2').focus(); });
 document.getElementById('inp2').addEventListener('keydown', e => { if(e.key==='Enter') go(); });

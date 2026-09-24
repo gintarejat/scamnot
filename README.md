@@ -1,131 +1,97 @@
-# ScamNot: AI-Powered Fraud Investigation Tool
+# Scamnot: Crypto Job Scam Investigator
 
-**Live demo:** [scamnot.vercel.app](https://scamnot.vercel.app)
+> An OSINT agent that investigates a company, job listing or URL across 7 areas using live web search. It returns a flagged/clear/unverified finding per area with sources. **The analyst gives the verdict**, and the tool exports an evidence report as a PDF.
 
-An interactive, AI-driven investigation tool for AML analysts, financial crime investigators, and compliance professionals. An AI agent runs live web searches across **7 investigation areas** and returns sourced findings for a company, job listing or URL. It is built for crypto job scams and first-pass counterparty checks. The analyst makes the call.
+**Live:** [scamnot.vercel.app](https://scamnot.vercel.app) · [How to use](https://scamnot.vercel.app/#how-to-use) · [Place in the AML OS](https://scamnot.vercel.app/#place-in-aml-os)
 
-**What kind of AI this is:** an AI agent (read-only OSINT gathering) plus a human decision. The agent only searches and reports; it cannot act on anything.
-
-Built on Anthropic's Claude API. Deployed serverless via Vercel. Part of the [ajatau compliance automation suite](https://ajatauaml.com).
+Part of the **[AML Operating System](https://ajatauaml.com/aml-operating-system.html)** · Layer 3, Customer lifecycle, and Layer 4, Control systems (adverse media).
 
 ---
 
-## The Problem It Solves
+## What it is
 
-Fraud investigations are manual, scattered, and slow. Analysts check corporate registries, domain records, adverse media and social profiles separately. Most job scams use the same playbook: identity cloning, address mismatches, off-platform contact, upfront payment requests. The tool gathers that public evidence in one pass so the analyst can judge the pattern.
-
----
-
-## The 7 investigation areas
-
-The agent searches the web and reports on seven areas. For each one it returns a status (flagged / clear / unverified), a short summary, details, specific flags and source links.
-
-| # | Area | What the agent looks for |
-|---|---|---|
-| 01 | **Job Listing Scan** | Company, role, salary, platform, email domain. Flags: unrealistic pay, vague role, free email, pressure tactics. |
-| 02 | **Company Registration** | Registry entry (e.g. Companies House): registration date, address, directors, active or dissolved. Flags: recently registered, dissolved, not found. |
-| 03 | **Address Verification** | Registered or listed address: residential, commercial or virtual office. |
-| 04 | **Web Presence** | Website, domain age, cloned content, quality. |
-| 05 | **Personnel Background** | Named recruiters or executives: verifiable profiles and industry history. Flags: thin, new or fake profiles. |
-| 06 | **Contact Methods** | Mass-CC emails, WhatsApp/Telegram hiring, free email domains. |
-| 07 | **Adverse Media** | Searches such as "[company] scam", "[company] fraud", "[company] fake job". |
-
-The agent also suggests an overall risk level (HIGH / MEDIUM / LOW) and a short investigator note. **The verdict is not automatic:** the analyst reads the evidence and clicks *Confirm: Scam / Fraud* or *Clear: Appears Legitimate*.
-
----
-
-## The case that started it: the WhiteBridge teardown (worked by hand)
-
-A real employment scam circulated on LinkedIn, WeWorkRemotely, and RemoteOK offering "Junior Crypto Analyst & Trader" at $70k–$90k.
-
-**Investigation output:**
-- 🚩 **OpSec:** All recipients visible in CC field (mass target list, not recruitment)
-- 🚩 **KYB:** Registered address ≠ website address. Corporate registry mismatch.
-- 🚩 **Identity Cloning:** Company name identical to unrelated legitimate business. Hijacking search reputation.
-- 🚩 **Digital Forensics:** Website is direct clone of Bear Bull Traders. Founder photos copied. Name changed from "Andrew Aziz" → "Aiden Razi."
-- 🚩 **Communication:** HR contact via WhatsApp/Telegram only (no official email escalation path).
-- 🚩 **Financial Ask:** "Send screenshot proving you have $200 in crypto before training starts."
-
-**Verdict:** SCAM. No job. No company. Data harvesting operation designed to move conversations off-platform and extract funds.
-
-**The point:** separate red flags cluster into a coherent fraud pattern. Each flag alone is suspicious; together they're diagnostic. This manual investigation is what the tool was built to speed up.
-
----
+| | |
+|---|---|
+| **Category** | **AI agent** (read-only): the model decides what to search, runs web searches and compiles structured findings |
+| **Users** | Job seekers checking an offer, and analysts doing a first-pass counterparty / KYB OSINT check |
+| **Output** | 7-area evidence file with sources, a risk level, a human verdict stamp, and a PDF |
 
 ## Architecture
 
 ```
-Browser (index.html, vanilla JS, jsPDF)
- ├─ Inputs: subject + optional supporting evidence
- ├─ runAgent(): request loop (up to 25 iterations) → /api/claude
- ├─ Parses the JSON findings and renders the 7 cards with sources
- ├─ Human verdict buttons → stamp
- └─ PDF export
-        │
+Browser (index.html, vanilla JS)
+ ├─ Tabs: Case File (the tool) · How To Use · Place in AML OS
+ ├─ Inputs: subject (company / job / URL) + optional supporting evidence
+ ├─ runAgent(): request loop (up to 25 requests) → /api/claude
+ │     resumes pause_turn when the server-side web search hits its limit
+ ├─ parseReport(): extracts the JSON findings
+ ├─ Renders the 7 step cards, sources, risk level
+ ├─ Verdict buttons → stamp
+ └─ jsPDF export
+          │
 Vercel serverless  api/claude.js
- ├─ In-memory rate limit: 5 investigations per IP per hour
- └─ Adds ANTHROPIC_API_KEY → Anthropic Messages API
-      model: claude-sonnet-4-6 · max_tokens: 8000 · Anthropic web search tool
+          ├─ in-memory rate limit: 5 investigations / IP / hour
+          └─ adds ANTHROPIC_API_KEY → Anthropic Messages API
+                (model claude-sonnet-4-6, max_tokens 8000,
+                 web_search tool)
 ```
 
-**Data:** no database, no user accounts. Investigations are not stored by the app. The subject and any pasted evidence are sent to the Anthropic API.
+**The 7 areas (as the code runs them):**
+
+| # | Area | Looks for |
+|---|---|---|
+| 01 | Job Listing Scan | unrealistic pay, vague role, free email, pressure |
+| 02 | Company Registration | registry entry, date, directors, active/dissolved |
+| 03 | Address Verification | residential / virtual office / commercial |
+| 04 | Web Presence | domain age, cloned content |
+| 05 | Personnel Background | verifiable recruiters / CEO profiles |
+| 06 | Contact Method | WhatsApp/Telegram hiring, free-mail, mass CC |
+| 07 | Adverse Media | "[company] scam / fraud / fake job" |
+
+## What is code and what is AI
+
+| Step | Done by |
+|---|---|
+| Choosing searches, reading pages, judging each area | **AI** (web search tool) |
+| Status per area (flagged / clear / unknown) | **AI** |
+| **Overall risk level (HIGH / MEDIUM / LOW)** | **AI.** Planned: a weighted score computed by code. |
+| Rendering, case number, rate limit, PDF | **Code** |
+| Verdict (Scam / Legitimate) | **Human** |
+
+## AI inventory
+
+| Field | Value |
+|---|---|
+| Purpose | Gather and summarise public information about a company or job offer |
+| Data in | Subject text and optional evidence the user pastes |
+| Data out | JSON: 7 findings, flags, sources, riskLevel, investigatorNote |
+| Model | `claude-sonnet-4-6` with the Anthropic web search tool |
+| Autonomy level | **Read-only**: searches the public web and changes nothing |
+| Human gate | Verdict buttons. The analyst confirms or clears. |
+
+## Known limitations
+
+1. **No sanctions or PEP screening.** The code doesn't check any sanctions or PEP list, and the AML OS map shows both as not built. Planned.
+2. **The AI sets the risk level.** It isn't reproducible: the same input can give a different level on a re-run.
+3. **The model writes the source URLs itself** inside the JSON, so a URL can be wrong. Open them before relying on a finding. Planned: take them from the actual search results instead.
+4. **Registry, domain age and address are checked by web search, not by APIs,** so results depend on what the search surfaces.
+5. **The rate limit is in-memory,** so it resets when Vercel starts a new instance. The proxy also forwards the request body as-is, so a caller can choose the model and parameters; only the rate limit restricts it.
+6. **Web search costs** are billed per search on top of tokens. Check current pricing.
+
+Long investigations are handled: web search runs on Anthropic's side, and when its server-side loop reaches its limit the API stops with `pause_turn`. The browser loop sends the turn back unchanged and the API resumes it, within the 25-request cap.
+
+## Setup
+
+```bash
+git clone https://github.com/gintarejat/scamnot
+# Vercel → Environment Variables:
+ANTHROPIC_API_KEY=sk-ant-...
+```
+The web search tool must be enabled for your Anthropic organisation (it's a console setting; check the current docs). No build step.
+
+## Roadmap
+
+A computed weighted score; a deterministic layer (Companies House API, RDAP, MX, OpenSanctions) before the agent; a narrower agent role (adverse-media entity resolution); a KYB mode; evidence pack v2; a re-check with a diff against the last run.
 
 ---
-
-## Deployment (Vercel)
-
-1. Import the GitHub repo into Vercel.
-2. Settings → Environment Variables → add `ANTHROPIC_API_KEY`.
-3. Make sure web search is enabled for your Anthropic organisation (console setting).
-4. Deploy. No build step: `index.html` is served as-is and `api/claude.js` runs as a serverless function.
-
----
-
-## Usage
-
-1. Open [scamnot.vercel.app](https://scamnot.vercel.app).
-2. Enter the company, job listing or URL; optionally paste the email text, salary or where you found it.
-3. Click **▶ Initiate Investigation** and wait while the agent searches (usually one to a few minutes).
-4. Read each area's findings and open the sources.
-5. Give your verdict and download the PDF report.
-
-No signup, no stored data.
-
----
-
-## Limitations
-
-- **The AI suggests the risk level.** It is not a computed score and can differ between runs.
-- **Source links are written by the model** in its answer. Open them before relying on a finding.
-- **No sanctions or PEP list screening,** and no direct registry, WHOIS or blockchain API. Everything comes from web search results.
-- **Rate limit is in-memory,** so it resets when Vercel starts a new instance.
-- **Cost:** each run can use up to 8,000 output tokens plus several web searches, which are billed separately. Check current Anthropic pricing.
-- OSINT is portfolio-grade, not a production compliance control.
-
----
-
-## Files
-
-- `index.html` — the whole application
-- `api/claude.js` — Vercel proxy with rate limit
-- `package.json`
-
----
-
-## Author
-
-**Gintarė Jatautytė** — AML analyst (25 months, Tier 1 Nordic bank) and AI compliance tool builder
-
-**LinkedIn:** [gintare-jatautyte](https://www.linkedin.com/in/gintare-jatautyte-11a507397/)  
-**Portfolio:** [ajatauaml.com](https://ajatauaml.com)  
-**Email:** gintare@ajatauaml.com
-
----
-
-## License
-
-MIT (open source, use freely)
-
----
-
-**Last updated:** 24 September 2026
+*Results are leads, not findings of fact. Not legal advice. Built by Gintarė Jatautytė · [ajatauaml.com](https://ajatauaml.com)*
